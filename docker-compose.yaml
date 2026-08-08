@@ -1,54 +1,34 @@
-# Pi-hole + Unbound — a portable, self-contained DNS/DHCP stack.
-#
-# All host/LAN-specific values come from .env (copy env.template -> .env).
-# With those set, `docker compose up -d` brings up the same stack on any host.
-#
-# Docs: https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+# Docs:
+# - https://github.com/pi-hole/docker-pi-hole/
+# - https://docs.pi-hole.net/
 services:
   pihole:
     container_name: pihole
     image: pihole/pihole:latest
-    # Host networking is required for the DHCP server (DHCP relies on broadcast
-    # packets that do not cross a Docker bridge) and lets Pi-hole advertise the
-    # host's own IP as the DNS server to clients.
+    # Need Host for this in order to run Unbound
     network_mode: host
     environment:
-      TZ: ${TZ:-America/Halifax}
-      # Web admin password. Set it in .env; compose errors out if it is unset.
-      FTLCONF_webserver_api_password: ${PASSWORD:?set PASSWORD in .env}
-      FTLCONF_webserver_port: ${WEB_PORT:-8314}
+      TZ: ${TZ}
+      FTLCONF_webserver_api_password: ${PASSWORD}
+      FTLCONF_webserver_port: ${HOST_PORT}
+      FTLCONF_dns_upstreams: ${DNS_UPSTREAMS}
       FTLCONF_dns_listeningMode: "LOCAL"
-      # Local unbound first, Cloudflare as a fallback so a single unbound
-      # failure is not total DNS loss. Semicolon-separated; note dnsmasq
-      # load-balances rather than strictly failing over, so some queries do
-      # reach the fallback.
-      FTLCONF_dns_upstreams: ${DNS_UPSTREAMS:-127.0.0.1#5335;1.1.1.1}
-      # --- DHCP server. Set DHCP_ACTIVE=false to let another device serve. ---
-      FTLCONF_dhcp_active: ${DHCP_ACTIVE:-true}
-      FTLCONF_dhcp_start: ${DHCP_START:-192.168.2.10}
-      FTLCONF_dhcp_end: ${DHCP_END:-192.168.2.199}
-      FTLCONF_dhcp_router: ${DHCP_ROUTER:-192.168.2.1}
-      # Long lease so a Pi-hole or router outage does not age every client off
-      # the network within the hour.
-      FTLCONF_dhcp_leaseTime: ${DHCP_LEASE:-24h}
-      # No IPv6 prefix advertised on this LAN; enabling DHCPv6 only made dnsmasq
-      # send RAs that clients answered with solicitations we could not satisfy.
+      # DHCP server settings
+      FTLCONF_dhcp_active: ${DHCP_ACTIVE
+      FTLCONF_dhcp_start: ${DHCP_START}
+      FTLCONF_dhcp_end: ${DHCP_END}
+      FTLCONF_dhcp_router: ${DHCP_ROUTER}
+      FTLCONF_dhcp_leaseTime: ${DHCP_LEASE}
       FTLCONF_dhcp_ipv6: "false"
-      # Resolve *.pi to this server (handy local shortcut). Parameterized so it
-      # tracks the host's static IP rather than a hard-coded address.
       FTLCONF_misc_dnsmasq_lines: |-
-        address=/.pi/${SERVER_IP:-192.168.2.2}
+        address=/.pi/${HOST_IP}
     volumes:
-      # Pi-hole's databases and generated config. Regenerated on first boot;
-      # gitignored (not part of the portable config).
       - "./etc-pihole:/etc/pihole"
-      # FTL logs. Without this mount they are destroyed on container recreate,
-      # taking the diagnostic history with them.
       - "./var-log-pihole:/var/log/pihole"
     cap_add:
-      - NET_ADMIN # required for the DHCP server
-      - SYS_TIME  # required for the NTP client to set host time
-      - SYS_NICE  # optional: extra scheduling priority
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
     restart: unless-stopped
 
   unbound:
@@ -57,9 +37,8 @@ services:
     network_mode: host
     volumes:
       - "./etc-unbound/unbound.conf:/etc/unbound/unbound.conf:ro"
+    # Some Claude suggested settings, unsure of them.
     ulimits:
-      # outgoing-range (950) * num-threads (2) needs ~1900 sockets; the default
-      # limit of 1024 silently capped unbound well below its config.
       nofile:
         soft: 4096
         hard: 4096
