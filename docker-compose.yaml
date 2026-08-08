@@ -14,7 +14,7 @@ services:
       FTLCONF_dns_upstreams: ${DNS_UPSTREAMS}
       FTLCONF_dns_listeningMode: "LOCAL"
       # DHCP server settings
-      FTLCONF_dhcp_active: ${DHCP_ACTIVE
+      FTLCONF_dhcp_active: ${DHCP_ACTIVE}
       FTLCONF_dhcp_start: ${DHCP_START}
       FTLCONF_dhcp_end: ${DHCP_END}
       FTLCONF_dhcp_router: ${DHCP_ROUTER}

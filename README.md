@@ -10,9 +10,6 @@ Having my network reliant on a box sharing a home with a bunch of random project
 - A **static IP** for the host, ideally *outside* the DHCP pool you configure below.
 - **Ports free** on the host: `53` (DNS), `67` (DHCP), plus your `WEB_PORT`.
   This stack uses **host networking**, which DHCP requires.
-- On Linux hosts, `systemd-resolved` usually squats on port 53. Free it:
-
-  ```
 
 ## Setup
 
