@@ -17,7 +17,7 @@ Having my network reliant on a box sharing a home with a bunch of random project
 2. Edit `.env`: set `PASSWORD`, your `HOST_IP`, and the DHCP range/router for
    your LAN. (Set `DHCP_ACTIVE=false` if something else serves DHCP.)
 3. `docker compose up -d`
-4. `sudo ./setup-network.sh` to configure your static ip and dns settings. Will drop your SSH session.
+4. `sudo ./setup-network.sh` to configure your static ip, firewall, and dns settings. Will drop your SSH session.
 5. `docker compose restart`
 6. Open the admin UI at `http://<HOST_IP>:<HOST_PORT>` (default `:8314`).
 

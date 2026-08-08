@@ -12,6 +12,9 @@ source .env
 IFACE="${1:-$(ip -4 route show default | awk '{print $5}')}"
 CON="$(nmcli -g GENERAL.CONNECTION device show "$IFACE")"
 
+firewall-cmd --permanent --add-port="$HOST_PORT/tcp"
+firewall-cmd --reload
+
 nmcli connection modify "$CON" \
   ipv4.method manual \
   ipv4.addresses "$HOST_IP/24" \
