@@ -43,3 +43,19 @@ services:
         soft: 4096
         hard: 4096
     restart: unless-stopped
+
+  glances:
+    image: nicolargo/glances:latest-full
+    container_name: glances
+    hostname: ${HOST_NAME}
+    pid: host
+    environment:
+      GLANCES_OPT: "-w"
+      TZ: ${TZ}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/os-release:/etc/os-release:ro
+      - /:/rootfs:ro
+    ports:
+      - "61208:61208"
+    restart: unless-stopped

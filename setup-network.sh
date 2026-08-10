@@ -13,6 +13,8 @@ IFACE="${1:-$(ip -4 route show default | awk '{print $5}')}"
 CON="$(nmcli -g GENERAL.CONNECTION device show "$IFACE")"
 
 firewall-cmd --permanent --add-port="$HOST_PORT/tcp"
+# Glances web/API
+firewall-cmd --permanent --add-port=61208/tcp
 firewall-cmd --reload
 
 nmcli connection modify "$CON" \
